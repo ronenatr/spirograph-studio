@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spirograph Studio</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --panel: #161b22;
+    --border: #2d333b;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --accent: #58a6ff;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: radial-gradient(circle at 50% -10%, #1b2433, var(--bg));
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px;
+  }
+  h1 {
+    font-weight: 700;
+    font-size: 1.6rem;
+    margin: 0 0 2px;
+    letter-spacing: -0.02em;
+  }
+  .sub { color: var(--muted); font-size: 0.85rem; margin-bottom: 18px; }
+  .stage {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+  }
+  .canvas-wrap {
+    position: relative;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+    background: #05070b;
+  }
+  canvas { display: block; }
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    width: 300px;
+  }
+  .ctrl { margin-bottom: 16px; }
+  .ctrl label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .ctrl label span { color: var(--text); font-variant-numeric: tabular-nums; }
+  input[type="range"] {
+    width: 100%;
+    accent-color: var(--accent);
+  }
+  .palette { display: flex; gap: 8px; margin-bottom: 16px; }
+  .swatch {
+    flex: 1;
+    height: 28px;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: transform .1s;
+  }
+  .swatch:hover { transform: translateY(-2px); }
+  .swatch.active { border-color: #fff; }
+  .btns { display: flex; gap: 8px; flex-wrap: wrap; }
+  button {
+    flex: 1;
+    min-width: 80px;
+    background: #21262d;
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: background .15s, transform .1s;
+  }
+  button:hover { background: #30363d; }
+  button:active { transform: scale(0.97); }
+  button.primary { background: var(--accent); color: #05070b; border-color: var(--accent); font-weight: 600; }
+  button.primary:hover { background: #79b8ff; }
+  .toggle { display: flex; align-items: center; justify-content: space-between; font-size: 0.85rem; margin-bottom: 16px; }
+  .switch { position: relative; width: 42px; height: 24px; }
+  .switch input { display: none; }
+  .slider {
+    position: absolute; inset: 0; background: #30363d; border-radius: 24px; transition: .2s; cursor: pointer;
+  }
+  .slider::before {
+    content: ""; position: absolute; height: 18px; width: 18px; left: 3px; top: 3px;
+    background: #fff; border-radius: 50%; transition: .2s;
+  }
+  .switch input:checked + .slider { background: var(--accent); }
+  .switch input:checked + .slider::before { transform: translateX(18px); }
+</style>
+</head>
+<body>
+  <h1>✦ Spirograph Studio</h1>
+  <div class="sub">Move the sliders. Watch math get hypnotic.</div>
+
+  <div class="stage">
+    <div class="canvas-wrap">
+      <canvas id="c" width="560" height="560"></canvas>
+    </div>
+
+    <div class="panel">
+      <div class="ctrl">
+        <label>Outer ring <span id="vR">120</span></label>
+        <input type="range" id="R" min="40" max="200" value="120">
+      </div>
+      <div class="ctrl">
+        <label>Inner gear <span id="vr">52</span></label>
+        <input type="range" id="r" min="10" max="160" value="52">
+      </div>
+      <div class="ctrl">
+        <label>Pen offset <span id="vd">78</span></label>
+        <input type="range" id="d" min="5" max="160" value="78">
+      </div>
+      <div class="ctrl">
+        <label>Speed <span id="vs">6</span></label>
+        <input type="range" id="s" min="1" max="20" value="6">
+      </div>
+      <div class="ctrl">
+        <label>Line width <span id="vw">2.0</span></label>
+        <input type="range" id="w" min="5" max="60" value="20">
+      </div>
+
+      <div class="palette" id="palette"></div>
+
+      <div class="toggle">
+        <span>Rainbow trail</span>
+        <label class="switch"><input type="checkbox" id="rainbow" checked><span class="slider"></span></label>
+      </div>
+
+      <div class="btns">
+        <button id="random">🎲 Surprise</button>
+        <button id="clear">Clear</button>
+        <button class="primary" id="save">⬇ Save PNG</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+const cv = document.getElementById('c');
+const ctx = cv.getContext('2d');
+const cx = cv.width / 2, cy = cv.height / 2;
+
+const palettes = ['#58a6ff', '#ff7b72', '#7ee787', '#f0883e', '#d2a8ff', '#ffffff'];
+let penColor = palettes[0];
+let rainbow = true;
+
+const ids = ['R','r','d','s','w'];
+const el = {};
+ids.forEach(id => {
+  el[id] = document.getElementById(id);
+  el['v'+id] = document.getElementById('v'+id);
+});
+
+let t = 0;          // running angle
+let hue = 0;
+let prev = null;    // previous point
+
+function params() {
+  return {
+    R: +el.R.value,
+    r: +el.r.value,
+    d: +el.d.value,
+    speed: +el.s.value,
+    width: +el.w.value / 10
+  };
+}
+
+function point(p, angle) {
+  // hypotrochoid: inner circle rolling inside outer circle
+  const diff = p.R - p.r;
+  const ratio = diff / p.r;
+  const x = cx + diff * Math.cos(angle) + p.d * Math.cos(ratio * angle);
+  const y = cy + diff * Math.sin(angle) - p.d * Math.sin(ratio * angle);
+  return { x, y };
+}
+
+function reset() {
+  ctx.fillStyle = '#05070b';
+  ctx.fillRect(0, 0, cv.width, cv.height);
+  t = 0;
+  prev = null;
+}
+
+function frame() {
+  const p = params();
+  const steps = p.speed;            // segments drawn per animation frame
+  ctx.lineWidth = p.width;
+  ctx.lineCap = 'round';
+
+  for (let i = 0; i < steps; i++) {
+    const pt = point(p, t);
+    if (prev) {
+      ctx.beginPath();
+      ctx.moveTo(prev.x, prev.y);
+      ctx.lineTo(pt.x, pt.y);
+      ctx.strokeStyle = rainbow ? `hsl(${hue % 360}, 90%, 65%)` : penColor;
+      ctx.stroke();
+    }
+    prev = pt;
+    t += 0.06;
+    hue += 0.6;
+  }
+  requestAnimationFrame(frame);
+}
+
+// labels + live restart on change
+function syncLabels() {
+  el.vR.textContent = el.R.value;
+  el.vr.textContent = el.r.value;
+  el.vd.textContent = el.d.value;
+  el.vs.textContent = el.s.value;
+  el.vw.textContent = (el.w.value / 10).toFixed(1);
+}
+ids.forEach(id => el[id].addEventListener('input', () => {
+  syncLabels();
+  if (id !== 's' && id !== 'w') reset();   // shape change -> redraw fresh
+}));
+
+// palette swatches
+const pal = document.getElementById('palette');
+palettes.forEach((c, i) => {
+  const sw = document.createElement('div');
+  sw.className = 'swatch' + (i === 0 ? ' active' : '');
+  sw.style.background = c;
+  sw.addEventListener('click', () => {
+    penColor = c;
+    document.querySelectorAll('.swatch').forEach(s => s.classList.remove('active'));
+    sw.classList.add('active');
+    document.getElementById('rainbow').checked = false;
+    rainbow = false;
+  });
+  pal.appendChild(sw);
+});
+
+document.getElementById('rainbow').addEventListener('change', e => rainbow = e.target.checked);
+
+document.getElementById('random').addEventListener('click', () => {
+  el.R.value = 60 + Math.floor(Math.random() * 140);
+  el.r.value = 10 + Math.floor(Math.random() * 150);
+  el.d.value = 10 + Math.floor(Math.random() * 150);
+  syncLabels();
+  reset();
+});
+
+document.getElementById('clear').addEventListener('click', reset);
+
+document.getElementById('save').addEventListener('click', () => {
+  const a = document.createElement('a');
+  a.download = 'spirograph.png';
+  a.href = cv.toDataURL('image/png');
+  a.click();
+});
+
+syncLabels();
+reset();
+frame();
+</script>
+</body>
+</html>
