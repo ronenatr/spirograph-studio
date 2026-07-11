@@ -1,279 +1,628 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Spirograph Studio</title>
+<title>R.PROJECTS | פרגולות אלומיניום וגדרות אלומיניום</title>
+<meta name="description" content="R.PROJECTS — התקנת פרגולות אלומיניום, גדרות אלומיניום, שערים ומעקות. תכנון, ייצור והתקנה באיכות גבוהה, אחריות מלאה. חייגו 052-681-3876 לייעוץ וקבלת הצעת מחיר.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Crect x='2' y='2' width='44' height='44' rx='12' fill='%230f1214' stroke='%23c9a24b' stroke-width='2.5'/%3E%3Cpath d='M18 14v20M18 14h7a5.5 5.5 0 0 1 0 11h-7M25 25l9 9' fill='none' stroke='%23c9a24b' stroke-width='3.4' stroke-linejoin='round' stroke-linecap='round'/%3E%3C/svg%3E">
 <style>
   :root {
-    --bg: #0d1117;
-    --panel: #161b22;
-    --border: #2d333b;
-    --text: #e6edf3;
-    --muted: #8b949e;
-    --accent: #58a6ff;
+    --bg: #0f1214;
+    --surface: #171b1e;
+    --surface-2: #1e2327;
+    --border: #2a3036;
+    --text: #eef2f4;
+    --muted: #9aa5ac;
+    --accent: #c9a24b;      /* champagne aluminum-gold */
+    --accent-2: #e0be6a;
+    --steel: #7d8a94;
+    --radius: 16px;
+    --shadow: 0 18px 50px rgba(0,0,0,0.45);
   }
-  * { box-sizing: border-box; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
   body {
-    margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    background: radial-gradient(circle at 50% -10%, #1b2433, var(--bg));
+    font-family: "Segoe UI", "Assistant", -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif;
+    background: var(--bg);
     color: var(--text);
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 24px;
+    line-height: 1.65;
+    overflow-x: hidden;
   }
-  h1 {
-    font-weight: 700;
-    font-size: 1.6rem;
-    margin: 0 0 2px;
+  a { color: inherit; text-decoration: none; }
+  img { max-width: 100%; display: block; }
+  .container { width: min(1140px, 92%); margin-inline: auto; }
+  section { padding: 84px 0; }
+  h2.section-title {
+    font-size: clamp(1.7rem, 4vw, 2.6rem);
+    font-weight: 800;
     letter-spacing: -0.02em;
+    text-align: center;
+    margin-bottom: 12px;
   }
-  .sub { color: var(--muted); font-size: 0.85rem; margin-bottom: 18px; }
-  .stage {
-    display: flex;
-    gap: 24px;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: flex-start;
-  }
-  .canvas-wrap {
-    position: relative;
-    border-radius: 16px;
-    overflow: hidden;
-    box-shadow: 0 12px 40px rgba(0,0,0,0.5);
-    background: #05070b;
-  }
-  canvas { display: block; }
-  .panel {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 20px;
-    width: 300px;
-  }
-  .ctrl { margin-bottom: 16px; }
-  .ctrl label {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.8rem;
+  .section-sub {
+    text-align: center;
     color: var(--muted);
-    margin-bottom: 6px;
+    max-width: 640px;
+    margin: 0 auto 48px;
+    font-size: 1.05rem;
   }
-  .ctrl label span { color: var(--text); font-variant-numeric: tabular-nums; }
-  input[type="range"] {
-    width: 100%;
-    accent-color: var(--accent);
+  .accent { color: var(--accent); }
+
+  /* ---------- Header ---------- */
+  header {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(15,18,20,0.82);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
   }
-  .palette { display: flex; gap: 8px; margin-bottom: 16px; }
-  .swatch {
-    flex: 1;
-    height: 28px;
-    border-radius: 8px;
-    cursor: pointer;
-    border: 2px solid transparent;
-    transition: transform .1s;
+  .nav {
+    display: flex; align-items: center; justify-content: space-between;
+    height: 68px;
   }
-  .swatch:hover { transform: translateY(-2px); }
-  .swatch.active { border-color: #fff; }
-  .btns { display: flex; gap: 8px; flex-wrap: wrap; }
-  button {
-    flex: 1;
-    min-width: 80px;
-    background: #21262d;
-    color: var(--text);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 10px;
-    font-size: 0.85rem;
-    cursor: pointer;
-    transition: background .15s, transform .1s;
+  .logo { display: flex; align-items: center; gap: 11px; font-weight: 800; font-size: 1.2rem; letter-spacing: 0.01em; }
+  .logo svg.logo-mark { width: 38px; height: 38px; flex: 0 0 auto; }
+  .logo .wordmark { display: flex; flex-direction: column; line-height: 1; }
+  .logo .wordmark .brand { font-weight: 800; font-size: 1.18rem; }
+  .logo .wordmark .tag { font-size: 0.6rem; font-weight: 600; letter-spacing: 0.28em; color: var(--muted); margin-top: 3px; }
+  .nav-links { display: flex; gap: 28px; align-items: center; }
+  .nav-links a { color: var(--muted); font-size: 0.95rem; transition: color .15s; }
+  .nav-links a:hover { color: var(--text); }
+  .nav-cta {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: #16130a; font-weight: 700; padding: 9px 18px; border-radius: 10px;
+    transition: transform .12s, box-shadow .2s;
   }
-  button:hover { background: #30363d; }
-  button:active { transform: scale(0.97); }
-  button.primary { background: var(--accent); color: #05070b; border-color: var(--accent); font-weight: 600; }
-  button.primary:hover { background: #79b8ff; }
-  .toggle { display: flex; align-items: center; justify-content: space-between; font-size: 0.85rem; margin-bottom: 16px; }
-  .switch { position: relative; width: 42px; height: 24px; }
-  .switch input { display: none; }
-  .slider {
-    position: absolute; inset: 0; background: #30363d; border-radius: 24px; transition: .2s; cursor: pointer;
+  .nav-cta:hover { transform: translateY(-1px); box-shadow: 0 8px 22px rgba(201,162,75,0.35); }
+  .burger { display: none; background: none; border: 0; color: var(--text); font-size: 1.6rem; cursor: pointer; }
+
+  /* ---------- Hero ---------- */
+  .hero {
+    position: relative;
+    padding: 120px 0 100px;
+    background:
+      radial-gradient(1000px 500px at 80% -10%, rgba(201,162,75,0.14), transparent 60%),
+      linear-gradient(180deg, #12161a, var(--bg));
+    overflow: hidden;
   }
-  .slider::before {
-    content: ""; position: absolute; height: 18px; width: 18px; left: 3px; top: 3px;
-    background: #fff; border-radius: 50%; transition: .2s;
+  .hero-grid {
+    display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 48px; align-items: center;
   }
-  .switch input:checked + .slider { background: var(--accent); }
-  .switch input:checked + .slider::before { transform: translateX(18px); }
+  .hero h1 {
+    font-size: clamp(2.1rem, 5.2vw, 3.6rem);
+    line-height: 1.12; font-weight: 800; letter-spacing: -0.03em;
+    margin-bottom: 18px;
+  }
+  .hero p.lead { font-size: 1.18rem; color: var(--muted); margin-bottom: 30px; max-width: 520px; }
+  .hero-badges { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 32px; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: var(--surface-2); border: 1px solid var(--border);
+    padding: 7px 14px; border-radius: 40px; font-size: 0.88rem; color: var(--text);
+  }
+  .badge svg { width: 16px; height: 16px; }
+  .btn-row { display: flex; flex-wrap: wrap; gap: 14px; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 9px;
+    padding: 14px 26px; border-radius: 12px; font-weight: 700; font-size: 1rem;
+    cursor: pointer; border: 1px solid transparent; transition: transform .12s, box-shadow .2s, background .2s;
+  }
+  .btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #16130a; }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(201,162,75,0.35); }
+  .btn-ghost { background: transparent; border-color: var(--border); color: var(--text); }
+  .btn-ghost:hover { background: var(--surface-2); }
+
+  /* Hero visual — CSS/SVG pergola illustration */
+  .hero-visual {
+    aspect-ratio: 4/3; border-radius: var(--radius); overflow: hidden;
+    border: 1px solid var(--border); box-shadow: var(--shadow);
+    background: linear-gradient(160deg, #202830, #10151a);
+    position: relative;
+  }
+  .hero-visual svg { width: 100%; height: 100%; }
+
+  /* ---------- Stats bar ---------- */
+  .stats {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 30px; margin-top: 60px;
+  }
+  .stat { text-align: center; }
+  .stat .num { font-size: 2rem; font-weight: 800; color: var(--accent); }
+  .stat .lbl { color: var(--muted); font-size: 0.92rem; }
+
+  /* ---------- Services ---------- */
+  .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 30px 26px; transition: transform .18s, border-color .18s;
+  }
+  .card:hover { transform: translateY(-5px); border-color: var(--accent); }
+  .card .icon {
+    width: 54px; height: 54px; border-radius: 12px; margin-bottom: 18px;
+    background: linear-gradient(135deg, rgba(201,162,75,0.18), rgba(201,162,75,0.06));
+    border: 1px solid rgba(201,162,75,0.3);
+    display: grid; place-items: center;
+  }
+  .card .icon svg { width: 28px; height: 28px; stroke: var(--accent); }
+  .card h3 { font-size: 1.25rem; margin-bottom: 10px; }
+  .card p { color: var(--muted); font-size: 0.98rem; }
+
+  /* ---------- Gallery ---------- */
+  .gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .g-item {
+    aspect-ratio: 4/3; border-radius: 14px; overflow: hidden;
+    border: 1px solid var(--border); position: relative;
+  }
+  .g-item svg { width: 100%; height: 100%; display: block; }
+  .g-item .cap {
+    position: absolute; inset-inline: 0; bottom: 0;
+    background: linear-gradient(transparent, rgba(0,0,0,0.8));
+    padding: 26px 16px 12px; font-size: 0.92rem; font-weight: 600;
+  }
+
+  /* ---------- Why us / process ---------- */
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
+  .feature-list { list-style: none; display: grid; gap: 18px; }
+  .feature-list li { display: flex; gap: 14px; }
+  .feature-list .fi {
+    flex: 0 0 auto; width: 38px; height: 38px; border-radius: 10px;
+    background: rgba(201,162,75,0.12); border: 1px solid rgba(201,162,75,0.3);
+    display: grid; place-items: center; color: var(--accent); font-weight: 800;
+  }
+  .feature-list h4 { font-size: 1.08rem; margin-bottom: 2px; }
+  .feature-list p { color: var(--muted); font-size: 0.95rem; }
+
+  .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+  .step {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 26px 22px; position: relative;
+  }
+  .step .n {
+    width: 40px; height: 40px; border-radius: 50%; margin-bottom: 14px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #16130a;
+    display: grid; place-items: center; font-weight: 800; font-size: 1.1rem;
+  }
+  .step h4 { font-size: 1.1rem; margin-bottom: 6px; }
+  .step p { color: var(--muted); font-size: 0.92rem; }
+
+  /* ---------- Testimonials ---------- */
+  .quotes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+  .quote {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 28px;
+  }
+  .stars { color: var(--accent); letter-spacing: 2px; margin-bottom: 12px; }
+  .quote p { font-size: 0.98rem; margin-bottom: 16px; }
+  .quote .who { display: flex; align-items: center; gap: 12px; }
+  .avatar {
+    width: 42px; height: 42px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--steel), #556069);
+    display: grid; place-items: center; font-weight: 700; color: #fff;
+  }
+  .who .name { font-weight: 700; font-size: 0.95rem; }
+  .who .city { color: var(--muted); font-size: 0.85rem; }
+
+  /* ---------- Contact / CTA ---------- */
+  .contact-wrap {
+    background:
+      radial-gradient(600px 300px at 90% 0%, rgba(201,162,75,0.14), transparent 60%),
+      var(--surface);
+    border: 1px solid var(--border); border-radius: 24px; padding: 50px;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 44px; align-items: start;
+  }
+  .contact-info h2 { font-size: 2rem; font-weight: 800; margin-bottom: 14px; }
+  .contact-info p { color: var(--muted); margin-bottom: 26px; }
+  .contact-line { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+  .contact-line .ci {
+    width: 44px; height: 44px; border-radius: 12px; flex: 0 0 auto;
+    background: var(--surface-2); border: 1px solid var(--border);
+    display: grid; place-items: center; color: var(--accent);
+  }
+  .contact-line .ci svg { width: 20px; height: 20px; }
+  .contact-line b { display: block; font-size: 1.05rem; }
+  .contact-line span { color: var(--muted); font-size: 0.9rem; }
+
+  form { display: grid; gap: 14px; }
+  form label { font-size: 0.9rem; color: var(--muted); margin-bottom: -6px; }
+  form input, form textarea, form select {
+    width: 100%; padding: 13px 15px; border-radius: 11px;
+    background: var(--bg); border: 1px solid var(--border); color: var(--text);
+    font-family: inherit; font-size: 0.98rem;
+  }
+  form input:focus, form textarea:focus, form select:focus {
+    outline: none; border-color: var(--accent);
+  }
+  form textarea { min-height: 96px; resize: vertical; }
+  form .btn-primary { justify-content: center; width: 100%; margin-top: 4px; }
+  .form-note { font-size: 0.82rem; color: var(--muted); text-align: center; }
+
+  /* ---------- Footer ---------- */
+  footer { border-top: 1px solid var(--border); padding: 40px 0; color: var(--muted); }
+  .footer-grid { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 20px; align-items: center; }
+  .footer-grid a:hover { color: var(--text); }
+  .footer-links { display: flex; gap: 22px; }
+
+  /* ---------- Floating WhatsApp ---------- */
+  .fab {
+    position: fixed; inset-inline-start: 22px; bottom: 22px; z-index: 60;
+    width: 58px; height: 58px; border-radius: 50%;
+    background: #25d366; display: grid; place-items: center;
+    box-shadow: 0 10px 30px rgba(37,211,102,0.45);
+    transition: transform .15s;
+  }
+  .fab:hover { transform: scale(1.08); }
+  .fab svg { width: 32px; height: 32px; fill: #fff; }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 900px) {
+    .hero-grid, .split, .contact-wrap { grid-template-columns: 1fr; }
+    .cards, .gallery, .quotes { grid-template-columns: 1fr 1fr; }
+    .steps { grid-template-columns: 1fr 1fr; }
+    .stats { grid-template-columns: 1fr 1fr; }
+    .hero-visual { order: -1; }
+    .nav-links { display: none; }
+    .burger { display: block; }
+    .nav-links.open {
+      display: flex; flex-direction: column; position: absolute; top: 68px; inset-inline: 0;
+      background: var(--surface); border-bottom: 1px solid var(--border); padding: 20px; gap: 16px;
+    }
+    .contact-wrap { padding: 30px; }
+  }
+  @media (max-width: 560px) {
+    .cards, .gallery, .quotes, .steps, .stats { grid-template-columns: 1fr; }
+    section { padding: 60px 0; }
+  }
 </style>
 </head>
 <body>
-  <h1>✦ Spirograph Studio</h1>
-  <div class="sub">Move the sliders. Watch math get hypnotic.</div>
 
-  <div class="stage">
-    <div class="canvas-wrap">
-      <canvas id="c" width="560" height="560"></canvas>
+<!-- Header -->
+<header>
+  <div class="container nav">
+    <a href="#" class="logo" aria-label="R.PROJECTS - עמוד הבית">
+      <svg class="logo-mark" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true">
+        <defs>
+          <linearGradient id="lg-gold" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#e0be6a"/><stop offset="1" stop-color="#b8892f"/>
+          </linearGradient>
+        </defs>
+        <rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="none" stroke="url(#lg-gold)" stroke-width="2.5"/>
+        <!-- aluminium slats -->
+        <g stroke="url(#lg-gold)" stroke-width="2" stroke-linecap="round" opacity="0.55">
+          <line x1="9" y1="12" x2="39" y2="12"/>
+          <line x1="9" y1="36" x2="39" y2="36"/>
+        </g>
+        <!-- letter R -->
+        <path d="M18 14v20M18 14h7a5.5 5.5 0 0 1 0 11h-7M25 25l9 9" fill="none" stroke="url(#lg-gold)" stroke-width="3.4" stroke-linejoin="round" stroke-linecap="round"/>
+      </svg>
+      <span class="wordmark">
+        <span class="brand">R.<span class="accent">PROJECTS</span></span>
+        <span class="tag">ALUMINUM • פרגולות וגדרות</span>
+      </span>
+    </a>
+    <nav class="nav-links" id="navLinks">
+      <a href="#services">שירותים</a>
+      <a href="#gallery">גלריה</a>
+      <a href="#why">למה אנחנו</a>
+      <a href="#process">תהליך העבודה</a>
+      <a href="#reviews">המלצות</a>
+      <a href="#contact" class="nav-cta">הצעת מחיר</a>
+    </nav>
+    <button class="burger" id="burger" aria-label="תפריט">☰</button>
+  </div>
+</header>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="container hero-grid">
+    <div>
+      <h1>פרגולות אלומיניום<br>וגדרות אלומיניום <span class="accent">שנשארות מושלמות לשנים</span></h1>
+      <p class="lead">תכנון, ייצור והתקנה במידה מדויקת. אלומיניום שלא מחליד, לא מתעקם ולא דורש תחזוקה — עיצוב נקי שמשדרג כל בית, חצר ומרפסת.</p>
+      <div class="hero-badges">
+        <span class="badge"><svg viewBox="0 0 24 24" fill="none" stroke="#c9a24b" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg> אחריות עד 10 שנים</span>
+        <span class="badge"><svg viewBox="0 0 24 24" fill="none" stroke="#c9a24b" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg> ייצור בהתאמה אישית</span>
+        <span class="badge"><svg viewBox="0 0 24 24" fill="none" stroke="#c9a24b" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg> עמידות בכל מזג אוויר</span>
+      </div>
+      <div class="btn-row">
+        <a href="#contact" class="btn btn-primary">קבלו הצעת מחיר חינם</a>
+        <a href="#gallery" class="btn btn-ghost">צפו בעבודות שלנו</a>
+      </div>
     </div>
-
-    <div class="panel">
-      <div class="ctrl">
-        <label>Outer ring <span id="vR">120</span></label>
-        <input type="range" id="R" min="40" max="200" value="120">
-      </div>
-      <div class="ctrl">
-        <label>Inner gear <span id="vr">52</span></label>
-        <input type="range" id="r" min="10" max="160" value="52">
-      </div>
-      <div class="ctrl">
-        <label>Pen offset <span id="vd">78</span></label>
-        <input type="range" id="d" min="5" max="160" value="78">
-      </div>
-      <div class="ctrl">
-        <label>Speed <span id="vs">6</span></label>
-        <input type="range" id="s" min="1" max="20" value="6">
-      </div>
-      <div class="ctrl">
-        <label>Line width <span id="vw">2.0</span></label>
-        <input type="range" id="w" min="5" max="60" value="20">
-      </div>
-
-      <div class="palette" id="palette"></div>
-
-      <div class="toggle">
-        <span>Rainbow trail</span>
-        <label class="switch"><input type="checkbox" id="rainbow" checked><span class="slider"></span></label>
-      </div>
-
-      <div class="btns">
-        <button id="random">🎲 Surprise</button>
-        <button id="clear">Clear</button>
-        <button class="primary" id="save">⬇ Save PNG</button>
-      </div>
+    <div class="hero-visual">
+      <!-- Pergola illustration -->
+      <svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#2b3946"/><stop offset="1" stop-color="#161d24"/>
+          </linearGradient>
+          <linearGradient id="alu" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#e8e8ea"/><stop offset="0.5" stop-color="#b9bcc0"/><stop offset="1" stop-color="#8a8f95"/>
+          </linearGradient>
+        </defs>
+        <rect width="400" height="300" fill="url(#sky)"/>
+        <rect x="0" y="230" width="400" height="70" fill="#20262c"/>
+        <!-- posts -->
+        <rect x="60" y="70" width="14" height="170" fill="url(#alu)"/>
+        <rect x="326" y="70" width="14" height="170" fill="url(#alu)"/>
+        <!-- top frame -->
+        <rect x="52" y="60" width="296" height="14" fill="url(#alu)"/>
+        <!-- louvers / slats -->
+        <g fill="#cfd2d6">
+          <rect x="70" y="46" width="260" height="7" transform="skewX(-12)"/>
+          <rect x="76" y="34" width="260" height="7" transform="skewX(-12)"/>
+          <rect x="82" y="22" width="260" height="7" transform="skewX(-12)"/>
+        </g>
+        <!-- decorative light -->
+        <circle cx="200" cy="150" r="60" fill="#c9a24b" opacity="0.08"/>
+      </svg>
     </div>
   </div>
 
+  <div class="container">
+    <div class="stats">
+      <div class="stat"><div class="num">15+</div><div class="lbl">שנות ניסיון</div></div>
+      <div class="stat"><div class="num">1,200+</div><div class="lbl">פרויקטים שהושלמו</div></div>
+      <div class="stat"><div class="num">100%</div><div class="lbl">אלומיניום איכותי</div></div>
+      <div class="stat"><div class="num">10</div><div class="lbl">שנות אחריות</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- Services -->
+<section id="services">
+  <div class="container">
+    <h2 class="section-title">מה אנחנו <span class="accent">מתקינים</span></h2>
+    <p class="section-sub">פתרונות אלומיניום מלאים לבית ולעסק — מתוכננים, מיוצרים ומותקנים על ידינו מקצה לקצה.</p>
+    <div class="cards">
+      <div class="card">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M3 21V8l9-5 9 5v13"/><path d="M3 12h18M3 16h18"/></svg></div>
+        <h3>פרגולות אלומיניום</h3>
+        <p>פרגולות קבועות ופרגולות רפפות מתכווננות (בילט) לשליטה בשמש ובצל. עיצוב מודרני, ניקוז נסתר ותאורה משולבת.</p>
+      </div>
+      <div class="card">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 21V4M9 21V4M14 21V4M19 21V4M2 9h20M2 15h20"/></svg></div>
+        <h3>גדרות אלומיניום</h3>
+        <p>גדרות פרטיות ודקורטיביות במגוון פרופילים וצבעים. אטומות או מאווררות — לפרטיות מקסימלית ומראה יוקרתי.</p>
+      </div>
+      <div class="card">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="1"/><path d="M12 4v16M7 12h1M16 12h1"/></svg></div>
+        <h3>שערים חשמליים</h3>
+        <p>שערי כניסה, שערים נגררים ושערי הולכי רגל עם מנוע ושלט. חוזק אלומיניום עם עיצוב שתואם את הגדר.</p>
+      </div>
+      <div class="card">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M3 18h18M6 18V9M18 18V9M4 9l8-5 8 5"/></svg></div>
+        <h3>מעקות ומחיצות</h3>
+        <p>מעקות מרפסת ומדרגות, מחיצות הפרדה ומסתורי כביסה — בטיחות ואסתטיקה שלא מחלידה עם הזמן.</p>
+      </div>
+      <div class="card">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M2 12h20M12 2v20"/><circle cx="12" cy="12" r="9"/></svg></div>
+        <h3>סוככים והצללות</h3>
+        <p>מבני הצללה לחניה, לבריכה ולחצר. שילדת אלומיניום חזקה עם פאנלים או רפפות לפי הצורך.</p>
+      </div>
+      <div class="card">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 2 2 7l10 5 10-5-10-5Z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
+        <h3>עבודות בהתאמה אישית</h3>
+        <p>יש לכם רעיון? נתכנן וניצור בדיוק לפי המידות והסגנון שלכם, כולל דוגמאות תלת-ממד לפני ביצוע.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Gallery -->
+<section id="gallery" style="background: var(--surface);">
+  <div class="container">
+    <h2 class="section-title">עבודות <span class="accent">נבחרות</span></h2>
+    <p class="section-sub">קצת מהפרויקטים האחרונים שביצענו — פרגולות, גדרות ושערים ברחבי הארץ.</p>
+    <div class="gallery" id="galleryGrid"></div>
+  </div>
+</section>
+
+<!-- Why us -->
+<section id="why">
+  <div class="container split">
+    <div>
+      <h2 class="section-title" style="text-align: right;">למה לבחור ב־<span class="accent">R.PROJECTS?</span></h2>
+      <p style="color: var(--muted); margin-bottom: 28px;">כי אנחנו לא רק מתקינים — אנחנו מלווים אתכם מהרעיון ועד התוצאה הסופית, עם חומר איכותי שלא מתפשר.</p>
+      <ul class="feature-list">
+        <li><div class="fi">✓</div><div><h4>אלומיניום שלא דורש תחזוקה</h4><p>לא מחליד, לא נצבע מחדש ולא מתעקם — עמידות אמיתית בשמש, בגשם ובמלח שליד הים.</p></div></li>
+        <li><div class="fi">✓</div><div><h4>ייצור עצמי במפעל</h4><p>שליטה מלאה על האיכות והמידות. בלי מתווכים ובלי הפתעות בזמנים.</p></div></li>
+        <li><div class="fi">✓</div><div><h4>צביעה בתנור בכל גוון RAL</h4><p>מאות גוונים לבחירה, כולל דמוי עץ, שמשתלבים בכל סגנון אדריכלי.</p></div></li>
+        <li><div class="fi">✓</div><div><h4>אחריות בכתב וליווי לאחר ההתקנה</h4><p>שקט נפשי מלא — אנחנו כאן גם אחרי שסיימנו.</p></div></li>
+      </ul>
+    </div>
+    <div class="hero-visual" style="aspect-ratio: 1/1;">
+      <svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="fence" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#3a4650"/><stop offset="1" stop-color="#141a1f"/>
+          </linearGradient>
+        </defs>
+        <rect width="300" height="300" fill="url(#fence)"/>
+        <g fill="#c9cdd1">
+          <rect x="40" y="60" width="16" height="200"/>
+          <rect x="80" y="60" width="16" height="200"/>
+          <rect x="120" y="60" width="16" height="200"/>
+          <rect x="160" y="60" width="16" height="200"/>
+          <rect x="200" y="60" width="16" height="200"/>
+          <rect x="240" y="60" width="16" height="200"/>
+        </g>
+        <rect x="30" y="70" width="240" height="14" fill="#e8e8ea"/>
+        <rect x="30" y="230" width="240" height="14" fill="#e8e8ea"/>
+        <circle cx="150" cy="150" r="70" fill="#c9a24b" opacity="0.07"/>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- Process -->
+<section id="process" style="background: var(--surface);">
+  <div class="container">
+    <h2 class="section-title">תהליך העבודה <span class="accent">שלנו</span></h2>
+    <p class="section-sub">פשוט, שקוף ובלי כאב ראש — מהשיחה הראשונה ועד ההתקנה.</p>
+    <div class="steps">
+      <div class="step"><div class="n">1</div><h4>ייעוץ ומדידה</h4><p>מגיעים אליכם, מבינים את הצורך ומודדים במקום — ללא עלות וללא התחייבות.</p></div>
+      <div class="step"><div class="n">2</div><h4>תכנון והצעת מחיר</h4><p>מכינים סקיצה, בוחרים גוון וחומר, ומקבלים הצעת מחיר מפורטת וברורה.</p></div>
+      <div class="step"><div class="n">3</div><h4>ייצור במפעל</h4><p>מייצרים את המוצר במידה מדויקת עם חומרי גלם איכותיים בלבד.</p></div>
+      <div class="step"><div class="n">4</div><h4>התקנה מקצועית</h4><p>צוות מיומן מתקין במהירות ובניקיון, ומוסר לכם פרויקט מוגמר עם אחריות.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- Testimonials -->
+<section id="reviews">
+  <div class="container">
+    <h2 class="section-title">לקוחות <span class="accent">ממליצים</span></h2>
+    <p class="section-sub">מאות משפחות ועסקים כבר בחרו בנו. הנה מה שהם אומרים.</p>
+    <div class="quotes">
+      <div class="quote">
+        <div class="stars">★★★★★</div>
+        <p>"התקינו לנו פרגולת רפפות על המרפסת והתוצאה מדהימה. עבודה נקייה, עמדו בזמנים והשירות פשוט אדיב. ממליצה בחום!"</p>
+        <div class="who"><div class="avatar">ד</div><div><div class="name">דנה לוי</div><div class="city">רעננה</div></div></div>
+      </div>
+      <div class="quote">
+        <div class="stars">★★★★★</div>
+        <p>"החלפנו את כל הגדר בבית לגדר אלומיניום דמוי עץ. נראה יוקרתי בטירוף ואפס תחזוקה. מקצוענים אמיתיים."</p>
+        <div class="who"><div class="avatar">א</div><div><div class="name">אבי כהן</div><div class="city">מודיעין</div></div></div>
+      </div>
+      <div class="quote">
+        <div class="stars">★★★★★</div>
+        <p>"שער חשמלי + גדר תואמת. מהתכנון ועד ההתקנה הכל היה חלק. מחיר הוגן ואיכות שרואים. תודה רבה!"</p>
+        <div class="who"><div class="avatar">ר</div><div><div class="name">רונית מזרחי</div><div class="city">ראשון לציון</div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Contact -->
+<section id="contact">
+  <div class="container">
+    <div class="contact-wrap">
+      <div class="contact-info">
+        <h2>קבלו הצעת מחיר <span class="accent">חינם</span></h2>
+        <p>השאירו פרטים ונחזור אליכם עוד היום עם ייעוץ מקצועי והצעה מותאמת אישית — ללא כל התחייבות.</p>
+        <div class="contact-line">
+          <div class="ci"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.6A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 2 .7 2.9a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.2-1.2a2 2 0 0 1 2.1-.5c.9.3 1.9.6 2.9.7a2 2 0 0 1 1.7 2Z"/></svg></div>
+          <div><b><a href="tel:+972526813876">052-681-3876</a></b><span>ראשון–חמישי, 08:00–18:00</span></div>
+        </div>
+        <div class="contact-line">
+          <div class="ci"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg></div>
+          <div><b>info@rprojects.co.il</b><span>מענה תוך 24 שעות</span></div>
+        </div>
+        <div class="contact-line">
+          <div class="ci"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg></div>
+          <div><b>אזור השרון והמרכז</b><span>שירות בכל הארץ בתיאום מראש</span></div>
+        </div>
+      </div>
+      <form id="quoteForm" novalidate>
+        <label for="name">שם מלא</label>
+        <input type="text" id="name" name="name" placeholder="ישראל ישראלי" required>
+        <label for="phone">טלפון</label>
+        <input type="tel" id="phone" name="phone" placeholder="050-0000000" required>
+        <label for="service">מה מעניין אתכם?</label>
+        <select id="service" name="service">
+          <option>פרגולת אלומיניום</option>
+          <option>גדר אלומיניום</option>
+          <option>שער חשמלי</option>
+          <option>מעקה / מחיצה</option>
+          <option>אחר</option>
+        </select>
+        <label for="message">פרטים נוספים (לא חובה)</label>
+        <textarea id="message" name="message" placeholder="ספרו לנו על הפרויקט..."></textarea>
+        <button type="submit" class="btn btn-primary">שליחה וקבלת הצעה</button>
+        <div class="form-note" id="formNote">הפרטים שלכם שמורים ולא יועברו לגורם שלישי.</div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer>
+  <div class="container footer-grid">
+    <a href="#" class="logo" aria-label="R.PROJECTS">
+      <svg class="logo-mark" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="none" stroke="#c9a24b" stroke-width="2.5"/>
+        <g stroke="#c9a24b" stroke-width="2" stroke-linecap="round" opacity="0.55"><line x1="9" y1="12" x2="39" y2="12"/><line x1="9" y1="36" x2="39" y2="36"/></g>
+        <path d="M18 14v20M18 14h7a5.5 5.5 0 0 1 0 11h-7M25 25l9 9" fill="none" stroke="#c9a24b" stroke-width="3.4" stroke-linejoin="round" stroke-linecap="round"/>
+      </svg>
+      <span class="wordmark"><span class="brand">R.<span class="accent">PROJECTS</span></span></span>
+    </a>
+    <div class="footer-links">
+      <a href="#services">שירותים</a>
+      <a href="#gallery">גלריה</a>
+      <a href="#why">למה אנחנו</a>
+      <a href="#contact">צור קשר</a>
+    </div>
+    <div>© <span id="year"></span> R.PROJECTS — פרגולות וגדרות אלומיניום. כל הזכויות שמורות.</div>
+  </div>
+</footer>
+
+<!-- Floating WhatsApp -->
+<a class="fab" href="https://wa.me/972526813876" target="_blank" rel="noopener" aria-label="וואטסאפ">
+  <svg viewBox="0 0 24 24"><path d="M17.5 14.4c-.3-.2-1.7-.9-2-1-.3-.1-.5-.2-.6.1-.2.3-.7 1-.9 1.1-.2.2-.3.2-.6 0-.3-.2-1.2-.5-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6l.4-.5c.2-.2.2-.3.3-.5.1-.2 0-.4 0-.5 0-.2-.6-1.5-.9-2-.2-.5-.4-.4-.6-.5h-.5c-.2 0-.5.1-.7.3-.2.3-.9.9-.9 2.2s1 2.6 1.1 2.7c.1.2 1.9 3 4.7 4.2.6.3 1.1.4 1.5.5.6.2 1.2.2 1.6.1.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2 0-.1-.2-.2-.5-.3Z"/><path d="M12 2a10 10 0 0 0-8.5 15.3L2 22l4.8-1.3A10 10 0 1 0 12 2Zm0 18.3c-1.5 0-3-.4-4.3-1.2l-.3-.2-2.9.8.8-2.8-.2-.3A8.3 8.3 0 1 1 12 20.3Z"/></svg>
+</a>
+
 <script>
-const cv = document.getElementById('c');
-const ctx = cv.getContext('2d');
-const cx = cv.width / 2, cy = cv.height / 2;
+  // Mobile nav
+  const burger = document.getElementById('burger');
+  const navLinks = document.getElementById('navLinks');
+  burger.addEventListener('click', () => navLinks.classList.toggle('open'));
+  navLinks.querySelectorAll('a').forEach(a => a.addEventListener('click', () => navLinks.classList.remove('open')));
 
-const palettes = ['#58a6ff', '#ff7b72', '#7ee787', '#f0883e', '#d2a8ff', '#ffffff'];
-let penColor = palettes[0];
-let rainbow = true;
+  // Year
+  document.getElementById('year').textContent = new Date().getFullYear();
 
-const ids = ['R','r','d','s','w'];
-const el = {};
-ids.forEach(id => {
-  el[id] = document.getElementById(id);
-  el['v'+id] = document.getElementById('v'+id);
-});
-
-let t = 0;          // running angle
-let hue = 0;
-let prev = null;    // previous point
-
-function params() {
-  return {
-    R: +el.R.value,
-    r: +el.r.value,
-    d: +el.d.value,
-    speed: +el.s.value,
-    width: +el.w.value / 10
-  };
-}
-
-function point(p, angle) {
-  // hypotrochoid: inner circle rolling inside outer circle
-  const diff = p.R - p.r;
-  const ratio = diff / p.r;
-  const x = cx + diff * Math.cos(angle) + p.d * Math.cos(ratio * angle);
-  const y = cy + diff * Math.sin(angle) - p.d * Math.sin(ratio * angle);
-  return { x, y };
-}
-
-function reset() {
-  ctx.fillStyle = '#05070b';
-  ctx.fillRect(0, 0, cv.width, cv.height);
-  t = 0;
-  prev = null;
-}
-
-function frame() {
-  const p = params();
-  const steps = p.speed;            // segments drawn per animation frame
-  ctx.lineWidth = p.width;
-  ctx.lineCap = 'round';
-
-  for (let i = 0; i < steps; i++) {
-    const pt = point(p, t);
-    if (prev) {
-      ctx.beginPath();
-      ctx.moveTo(prev.x, prev.y);
-      ctx.lineTo(pt.x, pt.y);
-      ctx.strokeStyle = rainbow ? `hsl(${hue % 360}, 90%, 65%)` : penColor;
-      ctx.stroke();
+  // Gallery — generated SVG "photos" so the page is fully self-contained
+  const galleryData = [
+    { t: 'פרגולת רפפות מתכווננת', c1: '#3a4650', c2: '#161d24', kind: 'pergola' },
+    { t: 'גדר אלומיניום דמוי עץ', c1: '#4a3d2e', c2: '#211a12', kind: 'fence' },
+    { t: 'שער כניסה חשמלי', c1: '#2f3a44', c2: '#12181d', kind: 'gate' },
+    { t: 'פרגולה עם תאורה משולבת', c1: '#33404a', c2: '#141a1f', kind: 'pergola' },
+    { t: 'גדר פרטיות אטומה', c1: '#39434c', c2: '#171d22', kind: 'fence' },
+    { t: 'מעקה מרפסת מודרני', c1: '#2c363f', c2: '#12171c', kind: 'rail' },
+  ];
+  function svgFor(item) {
+    const base = `<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${item.c1}"/><stop offset="1" stop-color="${item.c2}"/></linearGradient></defs><rect width="400" height="300" fill="url(#g)"/><rect x="0" y="240" width="400" height="60" fill="rgba(0,0,0,0.25)"/>`;
+    let art = '';
+    if (item.kind === 'pergola') {
+      art = `<rect x="70" y="80" width="12" height="160" fill="#d3d6da"/><rect x="318" y="80" width="12" height="160" fill="#d3d6da"/><rect x="60" y="72" width="280" height="12" fill="#e8e8ea"/>` +
+            `<g fill="#c0c4c8">${[0,1,2,3,4].map(i=>`<rect x="${75+i*52}" y="40" width="10" height="40"/>`).join('')}</g>`;
+    } else if (item.kind === 'fence') {
+      art = `<g fill="#cfa06b">${[0,1,2,3,4,5,6,7].map(i=>`<rect x="${40+i*42}" y="90" width="26" height="150"/>`).join('')}</g><rect x="30" y="100" width="352" height="12" fill="#e0c79c"/>`;
+    } else if (item.kind === 'gate') {
+      art = `<rect x="110" y="70" width="180" height="170" fill="none" stroke="#d3d6da" stroke-width="10"/><g stroke="#c0c4c8" stroke-width="7">${[0,1,2,3,4].map(i=>`<line x1="${130+i*34}" y1="80" x2="${130+i*34}" y2="230"/>`).join('')}</g>`;
+    } else {
+      art = `<rect x="50" y="150" width="300" height="10" fill="#e8e8ea"/><rect x="50" y="220" width="300" height="8" fill="#c0c4c8"/><g stroke="#c0c4c8" stroke-width="6">${[0,1,2,3,4,5,6].map(i=>`<line x1="${70+i*42}" y1="155" x2="${70+i*42}" y2="224"/>`).join('')}</g>`;
     }
-    prev = pt;
-    t += 0.06;
-    hue += 0.6;
+    return `<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">${base}${art}<circle cx="200" cy="140" r="70" fill="#c9a24b" opacity="0.06"/></svg>`;
   }
-  requestAnimationFrame(frame);
-}
-
-// labels + live restart on change
-function syncLabels() {
-  el.vR.textContent = el.R.value;
-  el.vr.textContent = el.r.value;
-  el.vd.textContent = el.d.value;
-  el.vs.textContent = el.s.value;
-  el.vw.textContent = (el.w.value / 10).toFixed(1);
-}
-ids.forEach(id => el[id].addEventListener('input', () => {
-  syncLabels();
-  if (id !== 's' && id !== 'w') reset();   // shape change -> redraw fresh
-}));
-
-// palette swatches
-const pal = document.getElementById('palette');
-palettes.forEach((c, i) => {
-  const sw = document.createElement('div');
-  sw.className = 'swatch' + (i === 0 ? ' active' : '');
-  sw.style.background = c;
-  sw.addEventListener('click', () => {
-    penColor = c;
-    document.querySelectorAll('.swatch').forEach(s => s.classList.remove('active'));
-    sw.classList.add('active');
-    document.getElementById('rainbow').checked = false;
-    rainbow = false;
+  const grid = document.getElementById('galleryGrid');
+  galleryData.forEach(item => {
+    const div = document.createElement('div');
+    div.className = 'g-item';
+    div.innerHTML = svgFor(item) + `<div class="cap">${item.t}</div>`;
+    grid.appendChild(div);
   });
-  pal.appendChild(sw);
-});
 
-document.getElementById('rainbow').addEventListener('change', e => rainbow = e.target.checked);
-
-document.getElementById('random').addEventListener('click', () => {
-  el.R.value = 60 + Math.floor(Math.random() * 140);
-  el.r.value = 10 + Math.floor(Math.random() * 150);
-  el.d.value = 10 + Math.floor(Math.random() * 150);
-  syncLabels();
-  reset();
-});
-
-document.getElementById('clear').addEventListener('click', reset);
-
-document.getElementById('save').addEventListener('click', () => {
-  const a = document.createElement('a');
-  a.download = 'spirograph.png';
-  a.href = cv.toDataURL('image/png');
-  a.click();
-});
-
-syncLabels();
-reset();
-frame();
+  // Contact form (demo — no backend). Opens WhatsApp with prefilled message.
+  document.getElementById('quoteForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    const name = document.getElementById('name').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const service = document.getElementById('service').value;
+    const message = document.getElementById('message').value.trim();
+    const note = document.getElementById('formNote');
+    if (!name || !phone) {
+      note.textContent = 'נא למלא שם וטלפון.';
+      note.style.color = '#ff7b72';
+      return;
+    }
+    const text = encodeURIComponent(`שלום, אני ${name} (${phone}). מעוניין/ת ב${service}. ${message}`);
+    window.open('https://wa.me/972526813876?text=' + text, '_blank');
+    note.textContent = 'תודה! פתחנו עבורכם וואטסאפ לשליחת הפנייה. נחזור אליכם בהקדם.';
+    note.style.color = '#7ee787';
+    this.reset();
+  });
 </script>
 </body>
 </html>
