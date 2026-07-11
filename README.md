@@ -1,49 +1,49 @@
-# ✦ Spirograph Studio
+# R.PROJECTS — אתר פרגולות וגדרות אלומיניום
 
-A tiny, dependency-free spirograph toy that runs entirely in the browser. Move the
-sliders and watch a [hypotrochoid](https://en.wikipedia.org/wiki/Hypotrochoid) — the
-curve traced by a point on a small gear rolling inside a larger ring — animate itself
-into hypnotic patterns.
+אתר תדמית ונחיתה (Landing Page) עבור העסק **R.PROJECTS** — תכנון, ייצור והתקנה של
+פרגולות אלומיניום, גדרות אלומיניום, שערים חשמליים, מעקות והצללות.
 
-## Getting started
+האתר בנוי בקובץ HTML יחיד, ללא תלויות וללא שלב build, בעברית ובכיוון RTL.
 
-No build step, no dependencies. Just open the file:
+## תוכן העמוד
+
+- **Hero** — כותרת, יתרונות מרכזיים וכפתורי קריאה לפעולה.
+- **סרגל נתונים** — שנות ניסיון, פרויקטים ואחריות.
+- **שירותים** — פרגולות, גדרות, שערים, מעקות, הצללות ועבודות בהתאמה אישית.
+- **גלריה** — תמונות אמיתיות של פרויקטים, מוטמעות בקובץ (data URI) כך שאין תלות בתמונות חיצוניות.
+- **למה אנחנו** — יתרונות האלומיניום והשירות.
+- **תהליך העבודה** — 4 שלבים מהייעוץ ועד ההתקנה.
+- **המלצות לקוחות**.
+- **טופס יצירת קשר** — מפנה לוואטסאפ עם הודעה מוכנה.
+- **כפתור וואטסאפ צף**.
+
+## הרצה
+
+אין תלויות ואין שלב build. פשוט פותחים את הקובץ בדפדפן:
 
 ```sh
-# clone, then open index.html in any modern browser
-start index.html      # Windows
-open index.html       # macOS
 xdg-open index.html   # Linux
+open index.html       # macOS
+start index.html      # Windows
 ```
 
-## Controls
+## לוגו
 
-| Control          | What it does                                                         |
-| ---------------- | ------------------------------------------------------------------- |
-| **Outer ring**   | Radius of the fixed outer circle.                                   |
-| **Inner gear**   | Radius of the rolling inner circle.                                 |
-| **Pen offset**   | How far the pen sits from the inner gear's center.                  |
-| **Speed**        | Number of curve segments drawn per animation frame.                 |
-| **Line width**   | Thickness of the drawn line.                                        |
-| **Palette**      | Pick a fixed pen color (also turns off the rainbow trail).          |
-| **Rainbow trail**| Cycle the hue continuously as the curve is drawn.                   |
-| **🎲 Surprise**  | Randomize the ring, gear, and offset for a fresh pattern.           |
-| **Clear**        | Wipe the canvas and start the current pattern over.                 |
-| **⬇ Save PNG**   | Download the current drawing as a PNG image.                        |
+- הלוגו מוטמע ישירות ב-`index.html` (SVG) ומופיע גם ב-favicon.
+- קובץ לוגו עצמאי לשימוש חיצוני (כרטיסי ביקור, רשתות חברתיות וכו'): [`logo.svg`](logo.svg).
 
-## How it works
+## התאמה אישית
 
-The curve is a hypotrochoid, drawn with the standard parametric equations:
+לפני עלייה לאוויר יש לעדכן ב-`index.html` את הפרטים הבאים:
 
-```
-x = (R - r) · cos(θ) + d · cos((R - r) / r · θ)
-y = (R - r) · sin(θ) - d · sin((R - r) / r · θ)
-```
+| מה                 | היכן                                                         |
+| ------------------ | ------------------------------------------------------------ |
+| מספר טלפון         | `052-681-3876` (מופיע במקטע יצירת הקשר)                       |
+| וואטסאפ            | `972526813876` (כפתור צף + טופס)                              |
+| אימייל             | `info@rprojects.co.il`                                        |
+| טקסטים / המלצות    | תוכן ה-HTML במקטעים הרלוונטיים                                |
+| תמונות אמיתיות     | ניתן להחליף את הדמיות ה-SVG בגלריה בתמונות פרויקטים אמיתיות   |
 
-where `R` is the outer ring radius, `r` is the inner gear radius, `d` is the pen
-offset, and `θ` is the running angle. Everything is drawn on a single `<canvas>` in
-plain JavaScript — see [index.html](index.html).
-
-## License
+## רישיון
 
 MIT
