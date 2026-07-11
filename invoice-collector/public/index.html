@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>אספן חשבוניות · Invoice Collector</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">🧾 <span>אספן חשבוניות</span></div>
+    <div class="account" id="account">
+      <span class="status-dot" id="statusDot"></span>
+      <span id="accountText">בודק חיבור…</span>
+      <button id="authBtn" class="btn small hidden">התחבר ל‑Gmail</button>
+      <button id="logoutBtn" class="btn small ghost hidden">התנתק</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- Setup / connect state -->
+    <section id="connectPanel" class="card center hidden">
+      <h2>התחברות לתיבת המייל</h2>
+      <p class="muted" id="connectMsg">
+        כדי לאסוף חשבוניות וקבלות, התחבר לחשבון ה‑Gmail שלך. האפליקציה מבקשת
+        הרשאת <strong>קריאה בלבד</strong> ואינה שולחת או מוחקת דבר.
+      </p>
+      <button id="authBtnBig" class="btn primary">התחבר ל‑Gmail</button>
+    </section>
+
+    <!-- Search + results -->
+    <section id="appPanel" class="hidden">
+      <div class="card controls">
+        <div class="field">
+          <label for="from">מתאריך</label>
+          <input type="date" id="from" />
+        </div>
+        <div class="field">
+          <label for="to">עד תאריך</label>
+          <input type="date" id="to" />
+        </div>
+        <div class="field checkbox">
+          <label><input type="checkbox" id="attachmentsOnly" /> רק עם קובץ מצורף</label>
+        </div>
+        <div class="field grow"></div>
+        <button id="searchBtn" class="btn primary">🔍 חפש חשבוניות</button>
+        <button id="exportBtn" class="btn" disabled>⬇ ייצוא CSV</button>
+      </div>
+
+      <div class="quick-ranges">
+        <span class="muted">קיצורים:</span>
+        <button class="chip" data-range="thisMonth">החודש</button>
+        <button class="chip" data-range="lastMonth">חודש שעבר</button>
+        <button class="chip" data-range="thisYear">השנה</button>
+        <button class="chip" data-range="lastYear">שנה שעברה</button>
+        <button class="chip" data-range="all">הכול</button>
+      </div>
+
+      <div id="summary" class="summary hidden"></div>
+
+      <div id="resultsWrap" class="card results hidden">
+        <table id="resultsTable">
+          <thead>
+            <tr>
+              <th class="col-check"><input type="checkbox" id="selectAll" /></th>
+              <th>תאריך</th>
+              <th>שולח</th>
+              <th>נושא</th>
+              <th>סכום</th>
+              <th>קבצים</th>
+            </tr>
+          </thead>
+          <tbody id="resultsBody"></tbody>
+        </table>
+      </div>
+
+      <div id="emptyState" class="center muted hidden">
+        לא נמצאו חשבוניות בטווח שנבחר. נסה טווח תאריכים אחר.
+      </div>
+
+      <div id="loading" class="center muted hidden">
+        <div class="spinner"></div>
+        סורק את תיבת המייל…
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot muted">
+    הרשאת קריאה בלבד · הנתונים נשארים בין הדפדפן שלך לחשבון שלך.
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
