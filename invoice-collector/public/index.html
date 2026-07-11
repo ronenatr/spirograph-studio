@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>אספן חשבוניות · Invoice Collector</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧾</text></svg>" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -12,20 +13,32 @@
     <div class="account" id="account">
       <span class="status-dot" id="statusDot"></span>
       <span id="accountText">בודק חיבור…</span>
-      <button id="authBtn" class="btn small hidden">התחבר ל‑Gmail</button>
+      <button id="authBtn" class="btn small hidden">התחבר</button>
       <button id="logoutBtn" class="btn small ghost hidden">התנתק</button>
     </div>
   </header>
 
   <main>
+    <!-- Provider switch -->
+    <div class="providers" id="providers">
+      <button class="prov" data-provider="google">
+        <span class="prov-name">Gmail</span>
+        <span class="prov-dot" id="dot-google"></span>
+      </button>
+      <button class="prov" data-provider="microsoft">
+        <span class="prov-name">Outlook</span>
+        <span class="prov-dot" id="dot-microsoft"></span>
+      </button>
+    </div>
+
     <!-- Setup / connect state -->
     <section id="connectPanel" class="card center hidden">
-      <h2>התחברות לתיבת המייל</h2>
+      <h2 id="connectTitle">התחברות לתיבת המייל</h2>
       <p class="muted" id="connectMsg">
-        כדי לאסוף חשבוניות וקבלות, התחבר לחשבון ה‑Gmail שלך. האפליקציה מבקשת
+        כדי לאסוף חשבוניות וקבלות, התחבר לחשבון שלך. האפליקציה מבקשת
         הרשאת <strong>קריאה בלבד</strong> ואינה שולחת או מוחקת דבר.
       </p>
-      <button id="authBtnBig" class="btn primary">התחבר ל‑Gmail</button>
+      <button id="authBtnBig" class="btn primary">התחבר</button>
     </section>
 
     <!-- Search + results -->
@@ -57,6 +70,7 @@
       </div>
 
       <div id="summary" class="summary hidden"></div>
+      <div id="totals" class="card totals hidden"></div>
 
       <div id="resultsWrap" class="card results hidden">
         <table id="resultsTable">
@@ -84,6 +98,20 @@
       </div>
     </section>
   </main>
+
+  <!-- Preview modal -->
+  <div id="previewOverlay" class="overlay hidden">
+    <div class="modal">
+      <div class="modal-head">
+        <span id="previewName" class="modal-title"></span>
+        <div class="modal-actions">
+          <a id="previewDownload" class="btn small" download>⬇ הורד</a>
+          <button id="previewClose" class="btn small ghost">✕ סגור</button>
+        </div>
+      </div>
+      <div id="previewBody" class="modal-body"></div>
+    </div>
+  </div>
 
   <footer class="foot muted">
     הרשאת קריאה בלבד · הנתונים נשארים בין הדפדפן שלך לחשבון שלך.

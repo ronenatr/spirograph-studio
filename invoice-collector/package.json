@@ -1,7 +1,7 @@
 {
   "name": "invoice-collector",
   "version": "1.0.0",
-  "description": "Connect to Gmail and collect all invoices and receipts, filtered by date range.",
+  "description": "Connect to Gmail or Outlook and collect all invoices and receipts, filtered by date range, with monthly totals, attachment preview and CSV export.",
   "type": "module",
   "main": "server.js",
   "scripts": {
