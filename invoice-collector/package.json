@@ -1,0 +1,21 @@
+{
+  "name": "invoice-collector",
+  "version": "1.0.0",
+  "description": "Connect to Gmail or Outlook and collect all invoices and receipts, filtered by date range, with monthly totals, attachment preview and CSV export.",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "googleapis": "^144.0.0",
+    "pdf-parse": "^1.1.1"
+  },
+  "license": "MIT"
+}
