@@ -4,6 +4,48 @@ const $ = (id) => document.getElementById(id);
 let currentResults = [];
 let activeProvider = 'google';
 let statusCache = {};
+let newIds = new Set(); // ids new since the previous search for this provider
+
+// ---- "New since last visit" tracking (localStorage) --------------------
+
+function seenKey() {
+  return `seen:${activeProvider}`;
+}
+function loadSeen() {
+  const raw = localStorage.getItem(seenKey());
+  return raw ? new Set(JSON.parse(raw)) : null; // null = never searched before
+}
+function saveSeen(set) {
+  localStorage.setItem(seenKey(), JSON.stringify([...set]));
+}
+function markAllSeen() {
+  const seen = loadSeen() || new Set();
+  currentResults.forEach((r) => seen.add(r.id));
+  saveSeen(seen);
+  newIds = new Set();
+  renderResults(currentResults);
+  renderSummaryCount();
+}
+
+function detectNewInvoices() {
+  const seen = loadSeen();
+  if (seen === null) {
+    // First ever search for this provider — establish a baseline silently.
+    saveSeen(new Set(currentResults.map((r) => r.id)));
+    newIds = new Set();
+    return;
+  }
+  newIds = new Set(currentResults.filter((r) => !seen.has(r.id)).map((r) => r.id));
+  if (newIds.size && 'Notification' in window && Notification.permission === 'granted') {
+    try {
+      new Notification('אספן חשבוניות', {
+        body: `${newIds.size} חשבוניות/קבלות חדשות מאז הביקור הקודם`,
+      });
+    } catch {
+      /* notifications unavailable */
+    }
+  }
+}
 
 function show(id) { $(id).classList.remove('hidden'); }
 function hide(id) { $(id).classList.add('hidden'); }
@@ -137,6 +179,11 @@ async function search() {
   const to = $('to').value;
   const attachmentsOnly = $('attachmentsOnly').checked;
 
+  // Ask for notification permission on this user gesture (first search).
+  if ('Notification' in window && Notification.permission === 'default') {
+    try { Notification.requestPermission(); } catch { /* older browsers */ }
+  }
+
   hide('resultsWrap');
   hide('emptyState');
   hide('summary');
@@ -144,11 +191,13 @@ async function search() {
   show('loading');
   $('searchBtn').disabled = true;
   $('exportBtn').disabled = true;
+  $('markSeenBtn').disabled = true;
 
   const params = new URLSearchParams({ provider: activeProvider });
   if (from) params.set('from', from);
   if (to) params.set('to', to);
   if (attachmentsOnly) params.set('attachmentsOnly', 'true');
+  if ($('scanPdf').checked) params.set('scanPdf', 'true');
 
   try {
     const res = await fetch('/api/invoices?' + params.toString());
@@ -162,6 +211,8 @@ async function search() {
       return;
     }
     currentResults = data.results || [];
+    detectNewInvoices();
+    lastData = data;
     renderSummary(data);
     renderTotals(currentResults);
     renderResults(currentResults);
@@ -173,14 +224,29 @@ async function search() {
   }
 }
 
+let lastData = null;
+
 function renderSummary(data) {
+  lastData = data;
   const withAtt = currentResults.filter((r) => r.attachments.length).length;
+  const newStat = newIds.size
+    ? `<div class="stat new"><b>${newIds.size}</b><span>חדשות ✨</span></div>`
+    : '';
+  const pdfStat = currentResults.some((r) => r.amountSource === 'pdf')
+    ? `<div class="stat"><b>${currentResults.filter((r) => r.amountSource === 'pdf').length}</b><span>סכום מ‑PDF</span></div>`
+    : '';
   $('summary').innerHTML = `
     <div class="stat"><b>${data.count}</b><span>נמצאו</span></div>
+    ${newStat}
     <div class="stat"><b>${withAtt}</b><span>עם קובץ מצורף</span></div>
+    ${pdfStat}
     ${data.truncated ? '<div class="stat"><b>⚠</b><span>הוצגו 250 הראשונות — צמצם טווח</span></div>' : ''}
   `;
   show('summary');
+}
+
+function renderSummaryCount() {
+  if (lastData) renderSummary(lastData);
 }
 
 // ---- Monthly totals -----------------------------------------------------
@@ -224,15 +290,47 @@ function renderTotals(rows) {
     })
     .join('');
 
+  // Per-vendor (sender) breakdown, top 6 by total.
+  const byVendor = {};
+  for (const r of priced) {
+    const v = shortFrom(r.from) || '—';
+    byVendor[v] ??= { total: 0, cur: {} };
+    byVendor[v].total += r.amountValue;
+    const c = r.amountCurrency || '?';
+    byVendor[v].cur[c] = (byVendor[v].cur[c] || 0) + r.amountValue;
+  }
+  const vendorRows = Object.entries(byVendor)
+    .sort((a, b) => b[1].total - a[1].total)
+    .slice(0, 6)
+    .map(([v, info]) => {
+      const sums = Object.entries(info.cur)
+        .map(([cur, val]) => money(val, cur === '?' ? '' : cur))
+        .join(' · ');
+      return `<tr><td>${escapeHtml(v)}</td><td>${sums}</td></tr>`;
+    })
+    .join('');
+
   $('totals').innerHTML = `
     <div class="totals-head">
       <b>סה״כ מזוהה:</b> ${grand}
       <span class="muted">(${priced.length} מתוך ${rows.length} עם סכום מזוהה)</span>
     </div>
-    <table class="month-table">
-      <thead><tr><th>חודש</th><th>סכום</th></tr></thead>
-      <tbody>${monthRows}</tbody>
-    </table>
+    <div class="totals-grid">
+      <div>
+        <div class="totals-subhead">לפי חודש</div>
+        <table class="month-table">
+          <thead><tr><th>חודש</th><th>סכום</th></tr></thead>
+          <tbody>${monthRows}</tbody>
+        </table>
+      </div>
+      <div>
+        <div class="totals-subhead">לפי ספק</div>
+        <table class="month-table">
+          <thead><tr><th>ספק</th><th>סכום</th></tr></thead>
+          <tbody>${vendorRows}</tbody>
+        </table>
+      </div>
+    </div>
   `;
   show('totals');
 }
@@ -302,11 +400,13 @@ function renderResults(rows) {
       ? `<a class="att mail" href="${escapeHtml(r.emailUrl)}" target="_blank" rel="noopener" title="פתח את המייל המקורי">✉ פתח במייל</a>`
       : '';
     const filesCell = [atts, bodyLinks].filter(Boolean).join('') || '';
+    const badge = newIds.has(r.id) ? '<span class="new-badge">חדש</span> ' : '';
+    if (newIds.has(r.id)) tr.classList.add('row-new');
     tr.innerHTML = `
       <td class="col-check"><input type="checkbox" class="row-check" data-id="${escapeHtml(r.id)}"></td>
       <td>${formatDate(r.date)}</td>
       <td class="cell-from">${escapeHtml(shortFrom(r.from))}</td>
-      <td class="cell-subject">${escapeHtml(r.subject) || '(ללא נושא)'}<span class="snippet">${escapeHtml(r.snippet).slice(0, 90)}</span></td>
+      <td class="cell-subject">${badge}${escapeHtml(r.subject) || '(ללא נושא)'}<span class="snippet">${escapeHtml(r.snippet).slice(0, 90)}</span></td>
       <td class="amount">${escapeHtml(r.amount) || ''}</td>
       <td class="cell-files">${filesCell}${filesCell ? '' : '<span class="muted">—</span>'}<div class="mail-line">${mailLink}</div></td>
     `;
@@ -321,6 +421,7 @@ function renderResults(rows) {
   });
   show('resultsWrap');
   $('exportBtn').disabled = false;
+  $('markSeenBtn').disabled = newIds.size === 0;
 }
 
 // ---- Preview modal ------------------------------------------------------
@@ -389,6 +490,7 @@ $('authBtnBig').addEventListener('click', goAuth);
 $('logoutBtn').addEventListener('click', logout);
 $('searchBtn').addEventListener('click', search);
 $('exportBtn').addEventListener('click', exportCsv);
+$('markSeenBtn').addEventListener('click', markAllSeen);
 $('previewClose').addEventListener('click', closePreview);
 $('previewOverlay').addEventListener('click', (e) => {
   if (e.target === $('previewOverlay')) closePreview();

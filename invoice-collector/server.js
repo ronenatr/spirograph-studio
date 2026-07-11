@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 
 import * as googleProvider from './providers/google.js';
 import * as microsoftProvider from './providers/microsoft.js';
+import { extractPdfAmount, isPdf } from './providers/pdf.js';
 
 dotenv.config();
 
@@ -83,16 +84,43 @@ app.get('/api/invoices', async (req, res) => {
 
   const { from, to } = req.query;
   const attachmentsOnly = req.query.attachmentsOnly === 'true';
+  const scanPdf = req.query.scanPdf === 'true';
   try {
     const result = await p.searchInvoices({ from, to, attachmentsOnly });
     if (result.error === 'not_connected') return res.status(401).json(result);
     if (result.error) return res.status(500).json(result);
+    if (scanPdf) await scanPdfsForAmounts(p, result.results);
     res.json(result);
   } catch (err) {
     console.error(`[invoices:${p.id}] failed:`, err.message);
     res.status(500).json({ error: 'search_failed', message: err.message });
   }
 });
+
+// For results with no detected amount, download the first PDF attachment and
+// try to read the total from it. Bounded so a big result set stays responsive.
+async function scanPdfsForAmounts(provider, results) {
+  const MAX_PDF_SCANS = 25;
+  const targets = results
+    .filter((r) => r.amountValue == null && r.attachments.some(isPdf))
+    .slice(0, MAX_PDF_SCANS);
+  for (const r of targets) {
+    const pdf = r.attachments.find(isPdf);
+    try {
+      const att = await provider.getAttachment({ messageId: r.id, attachmentId: pdf.attachmentId });
+      if (!att?.buffer) continue;
+      const amount = await extractPdfAmount(att.buffer);
+      if (amount) {
+        r.amount = amount.display;
+        r.amountValue = amount.value;
+        r.amountCurrency = amount.currency;
+        r.amountSource = 'pdf';
+      }
+    } catch {
+      /* skip this one */
+    }
+  }
+}
 
 // ---- Attachment (download or inline preview) ---------------------------
 
