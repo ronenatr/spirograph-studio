@@ -292,13 +292,23 @@ function renderResults(rows) {
         return `<span class="att-row">${preview}<a class="att" href="${attUrl(r, a)}" title="${escapeHtml(a.filename)}">📎 ${escapeHtml(a.filename)}</a></span>`;
       })
       .join('');
+    const bodyLinks = (r.links || [])
+      .map(
+        (l) =>
+          `<a class="att link" href="${escapeHtml(l.url)}" target="_blank" rel="noopener" title="${escapeHtml(l.url)}">🔗 ${escapeHtml(l.label)}</a>`
+      )
+      .join('');
+    const mailLink = r.emailUrl
+      ? `<a class="att mail" href="${escapeHtml(r.emailUrl)}" target="_blank" rel="noopener" title="פתח את המייל המקורי">✉ פתח במייל</a>`
+      : '';
+    const filesCell = [atts, bodyLinks].filter(Boolean).join('') || '';
     tr.innerHTML = `
       <td class="col-check"><input type="checkbox" class="row-check" data-id="${escapeHtml(r.id)}"></td>
       <td>${formatDate(r.date)}</td>
       <td class="cell-from">${escapeHtml(shortFrom(r.from))}</td>
       <td class="cell-subject">${escapeHtml(r.subject) || '(ללא נושא)'}<span class="snippet">${escapeHtml(r.snippet).slice(0, 90)}</span></td>
       <td class="amount">${escapeHtml(r.amount) || ''}</td>
-      <td>${atts || '<span class="muted">—</span>'}</td>
+      <td class="cell-files">${filesCell}${filesCell ? '' : '<span class="muted">—</span>'}<div class="mail-line">${mailLink}</div></td>
     `;
     body.appendChild(tr);
   }
@@ -335,7 +345,7 @@ function closePreview() {
 // ---- CSV export ---------------------------------------------------------
 
 function toCsv(rows) {
-  const header = ['ספק', 'תאריך', 'שולח', 'נושא', 'סכום', 'מטבע', 'קבצים מצורפים'];
+  const header = ['ספק', 'תאריך', 'שולח', 'נושא', 'סכום', 'מטבע', 'קבצים מצורפים', 'קישורים', 'קישור למייל'];
   const esc = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
   const lines = [header.map(esc).join(',')];
   for (const r of rows) {
@@ -348,6 +358,8 @@ function toCsv(rows) {
         r.amountValue ?? r.amount,
         r.amountCurrency,
         r.attachments.map((a) => a.filename).join(' | '),
+        (r.links || []).map((l) => l.url).join(' | '),
+        r.emailUrl || '',
       ]
         .map(esc)
         .join(',')

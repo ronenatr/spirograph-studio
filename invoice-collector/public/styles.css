@@ -191,6 +191,12 @@ tbody tr:hover { background: var(--panel-2); }
 .att:hover { background: #2b3644; }
 .att-row { display: inline-flex; align-items: center; gap: 4px; margin: 2px 0; }
 button.att.preview { font-size: 0.85rem; padding: 3px 7px; }
+.cell-files { max-width: 280px; }
+.att.link { color: #ffb454; border-color: #4a3a24; }
+.att.link:hover { background: #3a2f1e; }
+.att.mail { color: var(--muted); }
+.mail-line { margin-top: 6px; }
+.cell-files .att { max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* Preview modal */
 .overlay {

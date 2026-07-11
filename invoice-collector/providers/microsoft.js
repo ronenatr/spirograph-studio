@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseAmount } from './amount.js';
+import { extractLinks } from './links.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const TOKEN_PATH = path.join(__dirname, '..', 'token.microsoft.json');
@@ -149,7 +150,7 @@ export async function searchInvoices({ from, to, attachmentsOnly }) {
   if (!tokens) return { error: 'not_connected' };
 
   const search = buildSearch({ from, to, attachmentsOnly });
-  const select = 'id,subject,from,receivedDateTime,bodyPreview,hasAttachments';
+  const select = 'id,subject,from,receivedDateTime,bodyPreview,hasAttachments,webLink,body';
   const url =
     `${GRAPH}/me/messages?$search=${encodeURIComponent(`"${search}"`)}` +
     `&$top=100&$select=${select}`;
@@ -184,6 +185,8 @@ export async function searchInvoices({ from, to, attachmentsOnly }) {
       ? `${msg.from.emailAddress.name || ''} <${msg.from.emailAddress.address || ''}>`.trim()
       : '';
     const amount = parseAmount(msg.subject) || parseAmount(msg.bodyPreview);
+    const bodyHtml = msg.body?.contentType === 'html' ? msg.body.content : '';
+    const bodyText = msg.body?.contentType === 'text' ? msg.body.content : msg.bodyPreview || '';
     results.push({
       id: msg.id,
       provider: id,
@@ -195,6 +198,8 @@ export async function searchInvoices({ from, to, attachmentsOnly }) {
       amountValue: amount?.value ?? null,
       amountCurrency: amount?.currency || '',
       attachments,
+      links: extractLinks(bodyHtml, bodyText),
+      emailUrl: msg.webLink || '',
     });
   }
 

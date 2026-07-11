@@ -3,6 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { google } from 'googleapis';
 import { parseAmount } from './amount.js';
+import { extractLinks } from './links.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const TOKEN_PATH = path.join(__dirname, '..', 'token.google.json');
@@ -125,6 +126,19 @@ function headerValue(headers, nameWanted) {
   return h ? h.value : '';
 }
 
+// Decode the HTML and plain-text bodies from the MIME tree.
+function collectBodies(payload, acc = { html: '', text: '' }) {
+  if (!payload) return acc;
+  const { mimeType, body, parts } = payload;
+  if (body && body.data) {
+    const decoded = Buffer.from(body.data, 'base64url').toString('utf8');
+    if (mimeType === 'text/html') acc.html += decoded;
+    else if (mimeType === 'text/plain') acc.text += decoded;
+  }
+  if (parts) parts.forEach((p) => collectBodies(p, acc));
+  return acc;
+}
+
 function collectAttachments(payload, acc = []) {
   if (!payload) return acc;
   const { filename, body, parts } = payload;
@@ -179,6 +193,7 @@ export async function searchInvoices({ from, to, attachmentsOnly }) {
       const headers = msg.payload?.headers || [];
       const subject = headerValue(headers, 'Subject');
       const amount = parseAmount(subject) || parseAmount(msg.snippet);
+      const bodies = collectBodies(msg.payload);
       results.push({
         id: msg.id,
         provider: id,
@@ -193,6 +208,8 @@ export async function searchInvoices({ from, to, attachmentsOnly }) {
         amountValue: amount?.value ?? null,
         amountCurrency: amount?.currency || '',
         attachments: collectAttachments(msg.payload),
+        links: extractLinks(bodies.html, bodies.text),
+        emailUrl: `https://mail.google.com/mail/u/0/#all/${msg.id}`,
       });
     }
   }
