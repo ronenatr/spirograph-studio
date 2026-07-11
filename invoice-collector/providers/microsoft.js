@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { parseAmount } from './amount.js';
+import { parseAmount, parseTotalAmount, htmlToText } from './amount.js';
 import { extractLinks } from './links.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -184,9 +184,15 @@ export async function searchInvoices({ from, to, attachmentsOnly }) {
     const fromAddr = msg.from?.emailAddress
       ? `${msg.from.emailAddress.name || ''} <${msg.from.emailAddress.address || ''}>`.trim()
       : '';
-    const amount = parseAmount(msg.subject) || parseAmount(msg.bodyPreview);
     const bodyHtml = msg.body?.contentType === 'html' ? msg.body.content : '';
     const bodyText = msg.body?.contentType === 'text' ? msg.body.content : msg.bodyPreview || '';
+    const bodyPlain = htmlToText(bodyHtml) || bodyText || '';
+    const amount =
+      parseTotalAmount(msg.subject) ||
+      parseTotalAmount(bodyPlain) ||
+      parseAmount(msg.subject) ||
+      parseAmount(msg.bodyPreview) ||
+      parseAmount(bodyPlain);
     results.push({
       id: msg.id,
       provider: id,

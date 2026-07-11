@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { google } from 'googleapis';
-import { parseAmount } from './amount.js';
+import { parseAmount, parseTotalAmount, htmlToText } from './amount.js';
 import { extractLinks } from './links.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -192,8 +192,14 @@ export async function searchInvoices({ from, to, attachmentsOnly }) {
       if (!msg) continue;
       const headers = msg.payload?.headers || [];
       const subject = headerValue(headers, 'Subject');
-      const amount = parseAmount(subject) || parseAmount(msg.snippet);
       const bodies = collectBodies(msg.payload);
+      const bodyText = htmlToText(bodies.html) || bodies.text || '';
+      const amount =
+        parseTotalAmount(subject) ||
+        parseTotalAmount(bodyText) ||
+        parseAmount(subject) ||
+        parseAmount(msg.snippet) ||
+        parseAmount(bodyText);
       results.push({
         id: msg.id,
         provider: id,
